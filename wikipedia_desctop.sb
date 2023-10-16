@@ -1,0 +1,59 @@
+'initializing program variables
+graphicsWindowWidth = 1200
+graphicsWindowHeight= 700
+userInputX = 400
+userInputY = 150
+fetchedResultPrevieContainerX = 100
+fetchedResultPrevieContainerY = 200
+fetchedResultPrevieContainerWidth = 1000
+fetchedResultPrevieContainerHeight= 500
+wikipediaBaseUrl = "https://en.wikipedia.org/wiki"
+
+'initializing shapes and inputs
+userInputField = Controls.AddTextBox(userInputX, userInputY)
+fetchedResultPrevieContainer = Shapes.AddRectangle(fetchedResultPrevieContainerWidth, fetchedResultPrevieContainerHeight)
+
+Shapes.Move(fetchedResultPrevieContainer, fetchedResultPrevieContainerX, fetchedResultPrevieContainerY)
+
+'assigning variables
+GraphicsWindow.Width = graphicsWindowWidth
+GraphicsWindow.Height = graphicsWindowHeight
+GraphicsWindow.KeyDown = onKeyDown
+GraphicsWindow.CanResize = "false"
+
+'defining  functions
+Sub onKeyDown
+  If GraphicsWindow.LastKey = "Return" Then
+    userInput = Controls.GetTextBoxText(userInputField)
+    
+    textTransform()
+    
+    fetchedPageContents = Network.GetWebPageContents(wikipediaBaseUrl+underscoredUserInput)
+    TextWindow.WriteLine(fetchedPageContents)
+    Shapes.SetText(fetchedResultPrevieContainer, fetchedPageContents)
+    
+    Controls.SetTextBoxText(userInputField, "")
+  EndIf
+EndSub
+
+Sub textTransform
+  ' Reference to https://social.technet.microsoft.com/wiki/contents/articles/16003.small-basic-text-basics.aspx
+  'A simple find and replace
+  userInputCopy = userInput ' A working copy
+  findSpaces = " " 'The text to find
+  replaceWithUnderscore = "_" 'The text to replace with
+  underscoredUserInput = "" 'The result of the find and replace
+  spaceFoundOnPosition = Text.GetIndexOf(userInputCopy,findSpaces) ' The next occurence of our search text
+  
+  While (spaceFoundOnPosition > 0)
+    underscoredUserInput = underscoredUserInput+Text.GetSubText(userInputCopy,1,spaceFoundOnPosition-1) 'The text before our search text
+    underscoredUserInput = underscoredUserInput+replaceWithUnderscore 'Add the replace text
+    userInputCopy = Text.GetSubTextToEnd(userInputCopy,spaceFoundOnPosition+Text.GetLength(findSpaces)) 'The text after our search text
+    spaceFoundOnPosition = Text.GetIndexOf(userInputCopy,findSpaces) 'The next occurence of our next search text
+  EndWhile
+
+  underscoredUserInput = underscoredUserInput+userInputCopy 'The final text after our search text (if any).
+EndSub
+
+
+GraphicsWindow.Show()
